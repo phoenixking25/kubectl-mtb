@@ -1,0 +1,21 @@
+---
+version: 1.0.0
+title: Multi-Tenancy Benchmarks
+profile_levels:
+  - level: 1
+    title: Profile Level 1
+    benchmarks:
+      - id: MTB-PL1-CC-CPI-1
+        title: Block access to cluster resources
+        type: Configuration Check
+        category: Control Plane Isolation
+        description: Tenants should not be able to view, edit, create, or delete cluster (non-namespaced) resources such Node, ClusterRole, ClusterRoleBinding, etc.
+        remediation:
+        pkg: block_cluster_resources
+      - id: MTB-PL1-BC-CPI-5
+        title: Block privileged containers
+        type: Behavioral Check
+        category: Control Plane Isolation
+        description: By default a container is not allowed to access any devices on the host, but a “privileged” container can access all devices on the host. A process within a privileged container can also get unrestricted host access. Hence, tenants should not be allowed to run privileged containers.
+        remediation: Define a `PodSecurityPolicy` with `privileged` set to `false` and map the policy to each tenant's namespace, or use a policy engine such as [OPA/Gatekeeper](https://github.com/open-policy-agent/gatekeeper) or [Kyverno](https://kyverno.io) to prevent tenants from running privileged containers.
+        pkg: block_privileged_containers
