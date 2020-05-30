@@ -3,6 +3,7 @@ package block_cluster_resources
 import (
 	"fmt"
 
+	"github.com/phoenixking25/kubectl-mtb/pkg/benchmark"
 	"github.com/phoenixking25/kubectl-mtb/util"
 	authorizationv1 "k8s.io/api/authorization/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -15,55 +16,67 @@ type groupResource struct {
 	APIResource metav1.APIResource
 }
 
-var verbs = []string{"get", "list", "create", "update", "patch", "watch", "delete", "deletecollection"}
+var (
+	verbs = []string{"get", "list", "create", "update", "patch", "watch", "delete", "deletecollection"}
 
-func Run(tenant string, tenantNamespace string) (bool, error) {
-	resources := []groupResource{}
+	BCRbenchmark = &benchmark.Benchmark{
 
-	kclient, err := util.NewKubeClient()
-	if err != nil {
-		return false, err
-	}
+		Run: func(tenant, tenantNamespace string) (bool, error) {
+			resources := []groupResource{}
 
-	lists, err := kclient.Discovery().ServerPreferredResources()
-	if err != nil {
-		return false, err
-	}
-
-	for _, list := range lists {
-		if len(list.APIResources) == 0 {
-			continue
-		}
-		gv, err := schema.ParseGroupVersion(list.GroupVersion)
-		if err != nil {
-			continue
-		}
-		for _, resource := range list.APIResources {
-			if len(resource.Verbs) == 0 {
-				continue
+			kclient, err := util.NewKubeClient()
+			if err != nil {
+				return false, err
 			}
 
-			if resource.Namespaced {
-				continue
+			lists, err := kclient.Discovery().ServerPreferredResources()
+			if err != nil {
+				return false, err
 			}
-			resources = append(resources, groupResource{
-				APIGroup:    gv.Group,
-				APIResource: resource,
-			})
-		}
-	}
 
-	tclient, err := util.ImpersonateWithUserClient(tenant, tenantNamespace)
+			for _, list := range lists {
+				if len(list.APIResources) == 0 {
+					continue
+				}
+				gv, err := schema.ParseGroupVersion(list.GroupVersion)
+				if err != nil {
+					continue
+				}
+				for _, resource := range list.APIResources {
+					if len(resource.Verbs) == 0 {
+						continue
+					}
+
+					if resource.Namespaced {
+						continue
+					}
+					resources = append(resources, groupResource{
+						APIGroup:    gv.Group,
+						APIResource: resource,
+					})
+				}
+			}
+
+			tclient, err := util.ImpersonateWithUserClient(tenant, tenantNamespace)
+			if err != nil {
+				return false, err
+			}
+
+			err = RunAccessCheck(tclient, resources)
+			if err != nil {
+				return false, err
+			}
+
+			return true, nil
+		},
+	}
+)
+
+func init() {
+	err := BCRbenchmark.ReadConfig("/home/phoenix/GO/src/github.com/phoenixking25/kubectl-mtb/benchmarks/block_cluster_resources/config.yaml")
 	if err != nil {
-		return false, err
+		fmt.Println(err.Error())
 	}
-
-	err = RunAccessCheck(tclient, resources)
-	if err != nil {
-		return false, err
-	}
-
-	return true, nil
 }
 
 func RunAccessCheck(tclient *kubernetes.Clientset, resources []groupResource) error {
