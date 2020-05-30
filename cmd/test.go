@@ -18,6 +18,8 @@ var (
 	tenant          string
 	tenantNamespace string
 	err             error
+	pass            int
+	fail            int
 
 	testCmd = &cobra.Command{
 		Use:   "test",
@@ -37,14 +39,20 @@ var (
 				os.Exit(1)
 			}
 
-			color.HiBlue("%s %s", benchmarks.BenchmarkSuite.Title, benchmarks.BenchmarkSuite.Version)
+			color.HiBlue("=====%s %s=====", benchmarks.BenchmarkSuite.Title, benchmarks.BenchmarkSuite.Version)
+
+			fmt.Println("")
 
 			for _, b := range benchmarks.BenchmarkSuite.Benchmarks {
 				result, err := b.Run(tenant, tenantNamespace)
 
 				if result {
+					pass = pass + 1
+
 					color.HiGreen("[%s] %s Configured", b.ID, b.Title)
 				} else {
+					fail = fail + 1
+
 					color.Red("[%s] %s Not configured", b.ID, b.Title)
 					color.HiRed("Error: %s", err.Error())
 					color.HiYellow("Remediation: %s", b.GetRemediation())
@@ -52,6 +60,9 @@ var (
 
 				fmt.Println("")
 			}
+			green := color.New(color.FgGreen).SprintFunc()
+			red := color.New(color.FgRed).SprintFunc()
+			fmt.Printf("Passed: %s  Failed: %s\n", green(pass), red(fail))
 		},
 	}
 )

@@ -24,5 +24,8 @@ func (bs *BenchmarkSuite) SortBenchmarks() {
 		return
 	}
 
+	// split := strings.Split(str, "-")
+	// profileLevel = split[1][len(val)-1:]
+	// orderLevel =
 	return
 }
