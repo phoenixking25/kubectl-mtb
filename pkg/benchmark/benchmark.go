@@ -5,18 +5,19 @@ import (
 
 	"github.com/phoenixking25/kubectl-mtb/util"
 	"gopkg.in/yaml.v2"
+	"k8s.io/client-go/kubernetes"
 )
 
 // Benchmark struct
 type Benchmark struct {
-	ID            string
-	Title         string
-	BenchmarkType string
-	Category      string
-	Remediation   string
-	Description   string
-	ProfileLevel  string
-	Run           func(string, string) (bool, error)
+	ID            string `yaml:"id"`
+	Title         string `yaml:"title"`
+	BenchmarkType string `yaml:"benchmarkType"`
+	Category      string `yaml:"category"`
+	Description   string `yaml:"description"`
+	Remediation   string `yaml:"remediation"`
+	ProfileLevel  string `yaml:"profileLevel"`
+	Run           func(string, string, *kubernetes.Clientset, *kubernetes.Clientset) (bool, error)
 }
 
 func (b *Benchmark) GetProfileLevel() string {

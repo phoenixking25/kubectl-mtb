@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/phoenixking25/kubectl-mtb/pkg/benchmark"
-	"github.com/phoenixking25/kubectl-mtb/util"
 	authorizationv1 "k8s.io/api/authorization/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -16,18 +15,19 @@ type groupResource struct {
 	APIResource metav1.APIResource
 }
 
+func init() {
+	err := BCRbenchmark.ReadConfig("/home/phoenix/GO/src/github.com/phoenixking25/kubectl-mtb/benchmarks/block_cluster_resources/config.yaml")
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+}
+
 var (
 	verbs = []string{"get", "list", "create", "update", "patch", "watch", "delete", "deletecollection"}
 
 	BCRbenchmark = &benchmark.Benchmark{
-
-		Run: func(tenant, tenantNamespace string) (bool, error) {
+		Run: func(tenant, tenantNamespace string, kclient, tclient *kubernetes.Clientset) (bool, error) {
 			resources := []groupResource{}
-
-			kclient, err := util.NewKubeClient()
-			if err != nil {
-				return false, err
-			}
 
 			lists, err := kclient.Discovery().ServerPreferredResources()
 			if err != nil {
@@ -57,11 +57,6 @@ var (
 				}
 			}
 
-			tclient, err := util.ImpersonateWithUserClient(tenant, tenantNamespace)
-			if err != nil {
-				return false, err
-			}
-
 			err = RunAccessCheck(tclient, resources)
 			if err != nil {
 				return false, err
@@ -71,13 +66,6 @@ var (
 		},
 	}
 )
-
-func init() {
-	err := BCRbenchmark.ReadConfig("/home/phoenix/GO/src/github.com/phoenixking25/kubectl-mtb/benchmarks/block_cluster_resources/config.yaml")
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-}
 
 func RunAccessCheck(tclient *kubernetes.Clientset, resources []groupResource) error {
 	var sar *authorizationv1.SelfSubjectAccessReview
