@@ -22,7 +22,7 @@ func init() {
 
 var RRANRbenchmark = &benchmark.Benchmark{
 	Run: func(tenant string, tenantNamespace string, kclient, tclient *kubernetes.Clientset) (bool, error) {
-		pod := util.MakeSecPod(tenantNamespace, nil, nil, false, "", false, false, nil, nil, false)
+		pod := util.MakeSecPod(tenantNamespace, nil, nil, false, "", false, false, nil, nil, false, "")
 		_, err := tclient.CoreV1().Pods(tenantNamespace).Create(pod)
 		if err == nil {
 			return false, fmt.Errorf("Tenant must be unable to create pod with RunAsNonRoot set to false")

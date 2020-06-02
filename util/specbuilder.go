@@ -9,7 +9,7 @@ import (
 	imageutils "k8s.io/kubernetes/test/utils/image"
 )
 
-func MakeSecPod(ns string, pvclaims []*v1.PersistentVolumeClaim, inlineVolumeSources []*v1.VolumeSource, isPrivileged bool, command string, hostIPC bool, hostPID bool, seLinuxLabel *v1.SELinuxOptions, fsGroup *int64, runAsNonRoot bool) *v1.Pod {
+func MakeSecPod(ns string, pvclaims []*v1.PersistentVolumeClaim, inlineVolumeSources []*v1.VolumeSource, isPrivileged bool, command string, hostIPC bool, hostPID bool, seLinuxLabel *v1.SELinuxOptions, fsGroup *int64, runAsNonRoot bool, capability v1.Capability) *v1.Pod {
 	if len(command) == 0 {
 		command = "trap exit TERM; while true; do sleep 1; done"
 	}
@@ -43,6 +43,11 @@ func MakeSecPod(ns string, pvclaims []*v1.PersistentVolumeClaim, inlineVolumeSou
 					Args:    []string{"-c", command},
 					SecurityContext: &v1.SecurityContext{
 						Privileged: &isPrivileged,
+						Capabilities: &v1.Capabilities{
+							Add: []v1.Capability{
+								capability,
+							},
+						},
 					},
 				},
 			},

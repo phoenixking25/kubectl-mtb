@@ -1,4 +1,4 @@
-package block_privileged_containers
+package block_host_ipc
 
 import (
 	"fmt"
@@ -10,23 +10,22 @@ import (
 )
 
 const (
-	expectedVal = "Privileged containers are not allowed"
+	expectedVal = "Host IPC is not allowed to be used"
 )
 
 func init() {
-	err := BPCbenchmark.ReadConfig("/home/phoenix/GO/src/github.com/phoenixking25/kubectl-mtb/benchmarks/block_privileged_containers/config.yaml")
+	err := BHIPCbenchmark.ReadConfig("/home/phoenix/GO/src/github.com/phoenixking25/kubectl-mtb/benchmarks/block_host_ipc/config.yaml")
 	if err != nil {
 		fmt.Println(err.Error())
 	}
 }
 
-var BPCbenchmark = &benchmark.Benchmark{
+var BHIPCbenchmark = &benchmark.Benchmark{
 	Run: func(tenant string, tenantNamespace string, kclient, tclient *kubernetes.Clientset) (bool, error) {
-		// IsPrivileged set to true so that pod creation would fail
-		pod := util.MakeSecPod(tenantNamespace, nil, nil, true, "", false, false, nil, nil, true, "")
+		pod := util.MakeSecPod(tenantNamespace, nil, nil, true, "", true, false, nil, nil, true, "")
 		_, err := tclient.CoreV1().Pods(tenantNamespace).Create(pod)
 		if err == nil {
-			return false, fmt.Errorf("Tenant must be unable to create pod that sets privileged to true")
+			return false, fmt.Errorf("Tenant must be unable to create pod with HostIPC set to true")
 		} else if !strings.Contains(err.Error(), expectedVal) {
 			return false, err
 		}
