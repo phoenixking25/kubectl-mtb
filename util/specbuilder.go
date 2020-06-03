@@ -9,13 +9,13 @@ import (
 	imageutils "k8s.io/kubernetes/test/utils/image"
 )
 
-func MakeSecPod(ns string, pvclaims []*v1.PersistentVolumeClaim, inlineVolumeSources []*v1.VolumeSource, isPrivileged bool, command string, hostIPC bool, hostPID bool, seLinuxLabel *v1.SELinuxOptions, fsGroup *int64, runAsNonRoot bool, capability v1.Capability) *v1.Pod {
-	if len(command) == 0 {
-		command = "trap exit TERM; while true; do sleep 1; done"
+func MakeSecPod(p PodSpec) *v1.Pod {
+	if len(p.Command) == 0 {
+		p.Command = "trap exit TERM; while true; do sleep 1; done"
 	}
 	podName := "security-context-" + string(uuid.NewUUID())
-	if fsGroup == nil {
-		fsGroup = func(i int64) *int64 {
+	if p.fsGroup == nil {
+		p.fsGroup = func(i int64) *int64 {
 			return &i
 		}(1000)
 	}
@@ -26,27 +26,27 @@ func MakeSecPod(ns string, pvclaims []*v1.PersistentVolumeClaim, inlineVolumeSou
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      podName,
-			Namespace: ns,
+			Namespace: p.NS,
 		},
 		Spec: v1.PodSpec{
-			HostIPC: hostIPC,
-			HostPID: hostPID,
+			HostNetwork: p.HostNetwork,
+			HostIPC:     p.HostIPC,
+			HostPID:     p.HostPID,
 			SecurityContext: &v1.PodSecurityContext{
-				FSGroup:      fsGroup,
-				RunAsNonRoot: &runAsNonRoot,
+				FSGroup:      p.fsGroup,
+				RunAsNonRoot: &p.RunAsNonRoot,
 			},
 			Containers: []v1.Container{
 				{
 					Name:    "write-pod",
 					Image:   imageutils.GetE2EImage(imageutils.BusyBox),
 					Command: []string{"/bin/sh"},
-					Args:    []string{"-c", command},
+					Args:    []string{"-c", p.Command},
+					Ports:   p.Ports,
 					SecurityContext: &v1.SecurityContext{
-						Privileged: &isPrivileged,
+						Privileged: &p.IsPrivileged,
 						Capabilities: &v1.Capabilities{
-							Add: []v1.Capability{
-								capability,
-							},
+							Add: p.Capability,
 						},
 					},
 				},
@@ -56,9 +56,9 @@ func MakeSecPod(ns string, pvclaims []*v1.PersistentVolumeClaim, inlineVolumeSou
 	}
 	var volumeMounts = make([]v1.VolumeMount, 0)
 	var volumeDevices = make([]v1.VolumeDevice, 0)
-	var volumes = make([]v1.Volume, len(pvclaims)+len(inlineVolumeSources))
+	var volumes = make([]v1.Volume, len(p.Pvclaims)+len(p.InlineVolumeSources))
 	volumeIndex := 0
-	for _, pvclaim := range pvclaims {
+	for _, pvclaim := range p.Pvclaims {
 		volumename := fmt.Sprintf("volume%v", volumeIndex+1)
 		if pvclaim.Spec.VolumeMode != nil && *pvclaim.Spec.VolumeMode == v1.PersistentVolumeBlock {
 			volumeDevices = append(volumeDevices, v1.VolumeDevice{Name: volumename, DevicePath: "/mnt/" + volumename})
@@ -69,7 +69,7 @@ func MakeSecPod(ns string, pvclaims []*v1.PersistentVolumeClaim, inlineVolumeSou
 		volumes[volumeIndex] = v1.Volume{Name: volumename, VolumeSource: v1.VolumeSource{PersistentVolumeClaim: &v1.PersistentVolumeClaimVolumeSource{ClaimName: pvclaim.Name, ReadOnly: false}}}
 		volumeIndex++
 	}
-	for _, src := range inlineVolumeSources {
+	for _, src := range p.InlineVolumeSources {
 		volumename := fmt.Sprintf("volume%v", volumeIndex+1)
 		// In-line volumes can be only filesystem, not block.
 		volumeMounts = append(volumeMounts, v1.VolumeMount{Name: volumename, MountPath: "/mnt/" + volumename})
@@ -80,6 +80,6 @@ func MakeSecPod(ns string, pvclaims []*v1.PersistentVolumeClaim, inlineVolumeSou
 	podSpec.Spec.Containers[0].VolumeMounts = volumeMounts
 	podSpec.Spec.Containers[0].VolumeDevices = volumeDevices
 	podSpec.Spec.Volumes = volumes
-	podSpec.Spec.SecurityContext.SELinuxOptions = seLinuxLabel
+	podSpec.Spec.SecurityContext.SELinuxOptions = p.seLinuxLabel
 	return podSpec
 }

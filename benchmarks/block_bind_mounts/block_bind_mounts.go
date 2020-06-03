@@ -1,12 +1,14 @@
 package block_bind_mounts
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
 	"github.com/phoenixking25/kubectl-mtb/pkg/benchmark"
 	"github.com/phoenixking25/kubectl-mtb/util"
 	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -33,8 +35,8 @@ var BBMbenchmark = &benchmark.Benchmark{
 			},
 		}
 
-		pod := util.MakeSecPod(tenantNamespace, nil, inlineVolumeSources, false, "", false, false, nil, nil, true, "")
-		_, err := tclient.CoreV1().Pods(tenantNamespace).Create(pod)
+		pod := util.MakeSecPod(util.PodSpec{NS: tenantNamespace, InlineVolumeSources: inlineVolumeSources})
+		_, err := tclient.CoreV1().Pods(tenantNamespace).Create(context.TODO(), pod, metav1.CreateOptions{DryRun: []string{metav1.DryRunAll}})
 		if err == nil {
 			return false, fmt.Errorf("Tenant must be unable to create pod with host-path volume")
 		} else if !strings.Contains(err.Error(), expectedVal) {

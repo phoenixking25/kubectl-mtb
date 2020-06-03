@@ -1,6 +1,7 @@
 package block_cluster_resources
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/phoenixking25/kubectl-mtb/pkg/benchmark"
@@ -86,7 +87,7 @@ func RunAccessCheck(tclient *kubernetes.Clientset, resources []groupResource) er
 				},
 			}
 
-			response, err := tclient.AuthorizationV1().SelfSubjectAccessReviews().Create(sar)
+			response, err := tclient.AuthorizationV1().SelfSubjectAccessReviews().Create(context.TODO(), sar, metav1.CreateOptions{DryRun: []string{metav1.DryRunAll}})
 			if err != nil {
 				return err
 			}

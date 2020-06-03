@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -65,14 +66,14 @@ func (t *testOptions) validate(cmd *cobra.Command, args []string) {
 	}
 
 	// Check Namespace
-	_, t.err = t.kclient.CoreV1().Namespaces().Get(t.tenantNamespace, metav1.GetOptions{})
+	_, t.err = t.kclient.CoreV1().Namespaces().Get(context.TODO(), t.tenantNamespace, metav1.GetOptions{})
 	if t.err != nil {
 		color.Red(t.err.Error())
 		os.Exit(1)
 	}
 
 	// Check Tenant as a SA
-	_, t.err = t.kclient.CoreV1().ServiceAccounts(t.tenantNamespace).Get(t.tenant, metav1.GetOptions{})
+	_, t.err = t.kclient.CoreV1().ServiceAccounts(t.tenantNamespace).Get(context.TODO(), t.tenant, metav1.GetOptions{})
 	if t.err != nil {
 		color.Red(t.err.Error())
 		os.Exit(1)
