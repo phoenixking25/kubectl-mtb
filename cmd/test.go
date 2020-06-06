@@ -23,6 +23,11 @@ type testOptions struct {
 	tclient         *kubernetes.Clientset
 }
 
+type groupResource struct {
+	APIGroup    string
+	APIResource metav1.APIResource
+}
+
 func init() {
 	testCmd.Flags().StringP("namespace", "n", "", "Tenant namespace")
 	testCmd.Flags().StringP("tenant-admin", "t", "", "Tenant service account name")
@@ -83,6 +88,25 @@ func (t *testOptions) validate(cmd *cobra.Command, args []string) {
 	t.tclient, t.err = util.ImpersonateWithUserClient(t.tenant, t.tenantNamespace)
 	if t.err != nil {
 		color.Red(t.err.Error())
+		os.Exit(1)
+	}
+
+	resources := []util.GroupResource{
+		{
+			APIGroup: "",
+			APIResource: metav1.APIResource{
+				Name: "pods",
+			},
+		},
+	}
+	verbs := []string{"create"}
+	access, msg, err := util.RunAccessCheck(t.tclient, t.tenantNamespace, resources, verbs)
+	if err != nil {
+		color.Red(t.err.Error())
+		os.Exit(1)
+	}
+	if !access {
+		color.Red(msg)
 		os.Exit(1)
 	}
 }
