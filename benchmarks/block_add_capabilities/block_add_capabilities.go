@@ -3,7 +3,6 @@ package block_add_capabilities
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/phoenixking25/kubectl-mtb/pkg/benchmark"
 	"github.com/phoenixking25/kubectl-mtb/util"
@@ -25,12 +24,17 @@ func init() {
 
 var BACbenchmark = &benchmark.Benchmark{
 	Run: func(tenant string, tenantNamespace string, kclient, tclient *kubernetes.Clientset) (bool, error) {
-		pod := util.MakeSecPod(util.PodSpec{NS: tenantNamespace, Capability: []v1.Capability{"SETPCAP"}})
-		_, err := tclient.CoreV1().Pods(tenantNamespace).Create(context.TODO(), pod, metav1.CreateOptions{DryRun: []string{metav1.DryRunAll}})
+
+		podSpec := &util.PodSpec{NS: tenantNamespace, Capability: []v1.Capability{"SETPCAP"}}
+		err := podSpec.SetDefaults()
+		if err != nil {
+			return false, err
+		}
+
+		pod := util.MakeSecPod(*podSpec)
+		_, err = tclient.CoreV1().Pods(tenantNamespace).Create(context.TODO(), pod, metav1.CreateOptions{DryRun: []string{metav1.DryRunAll}})
 		if err == nil {
 			return false, fmt.Errorf("Tenant must be unable to create pod with add capabilities")
-		} else if !strings.Contains(err.Error(), expectedVal) {
-			return false, err
 		}
 		return true, nil
 	},

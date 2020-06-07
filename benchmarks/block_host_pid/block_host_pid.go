@@ -3,7 +3,6 @@ package block_host_pid
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/phoenixking25/kubectl-mtb/pkg/benchmark"
 	"github.com/phoenixking25/kubectl-mtb/util"
@@ -24,12 +23,17 @@ func init() {
 
 var BHPIDbenchmark = &benchmark.Benchmark{
 	Run: func(tenant string, tenantNamespace string, kclient, tclient *kubernetes.Clientset) (bool, error) {
-		pod := util.MakeSecPod(util.PodSpec{NS: tenantNamespace, HostPID: true})
-		_, err := tclient.CoreV1().Pods(tenantNamespace).Create(context.TODO(), pod, metav1.CreateOptions{DryRun: []string{metav1.DryRunAll}})
+
+		podSpec := &util.PodSpec{NS: tenantNamespace, HostPID: true}
+		err := podSpec.SetDefaults()
+		if err != nil {
+			return false, err
+		}
+
+		pod := util.MakeSecPod(*podSpec)
+		_, err = tclient.CoreV1().Pods(tenantNamespace).Create(context.TODO(), pod, metav1.CreateOptions{DryRun: []string{metav1.DryRunAll}})
 		if err == nil {
 			return false, fmt.Errorf("Tenant must be unable to create pod with HostPID set to true")
-		} else if !strings.Contains(err.Error(), expectedVal) {
-			return false, err
 		}
 		return true, nil
 	},

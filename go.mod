@@ -3,6 +3,7 @@ module github.com/phoenixking25/kubectl-mtb
 go 1.13
 
 require (
+	github.com/creasty/defaults v1.3.0
 	github.com/fatih/color v1.9.0
 	github.com/spf13/cobra v1.0.0
 	gopkg.in/yaml.v2 v2.2.8

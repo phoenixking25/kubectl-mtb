@@ -27,11 +27,19 @@ func init() {
 var BHNPbenchmark = &benchmark.Benchmark{
 	Run: func(tenant string, tenantNamespace string, kclient, tclient *kubernetes.Clientset) (bool, error) {
 		//Tenant containers cannot use host networking
-		pod := util.MakeSecPod(util.PodSpec{NS: tenantNamespace, HostNetwork: true, Ports: nil})
-		_, err := tclient.CoreV1().Pods(tenantNamespace).Create(context.TODO(), pod, metav1.CreateOptions{DryRun: []string{metav1.DryRunAll}})
+
+		podSpec := &util.PodSpec{NS: tenantNamespace, HostNetwork: true, Ports: nil}
+		err := podSpec.SetDefaults()
+		if err != nil {
+			return false, err
+		}
+
+		pod := util.MakeSecPod(*podSpec)
+		_, err = tclient.CoreV1().Pods(tenantNamespace).Create(context.TODO(), pod, metav1.CreateOptions{DryRun: []string{metav1.DryRunAll}})
 		if err == nil {
 			return false, fmt.Errorf("Tenant must be unable to create pod with host networking set to true")
-		} else if !strings.Contains(err.Error(), expectedHostNetworkVal) {
+		}
+		if !strings.Contains(err.Error(), expectedHostNetworkVal) {
 			return false, err
 		}
 
@@ -42,12 +50,17 @@ var BHNPbenchmark = &benchmark.Benchmark{
 				ContainerPort: 8086,
 			},
 		}
-		pod = util.MakeSecPod(util.PodSpec{NS: tenantNamespace, HostNetwork: false, Ports: ports})
+
+		podSpec = &util.PodSpec{NS: tenantNamespace, HostNetwork: false, Ports: ports}
+		err = podSpec.SetDefaults()
+		if err != nil {
+			return false, err
+		}
+
+		pod = util.MakeSecPod(*podSpec)
 		_, err = tclient.CoreV1().Pods(tenantNamespace).Create(context.TODO(), pod, metav1.CreateOptions{DryRun: []string{metav1.DryRunAll}})
 		if err == nil {
 			return false, fmt.Errorf("Tenant must be unable to create pod with defined host ports")
-		} else if !strings.Contains(err.Error(), expectedHostNetworkVal) {
-			return false, err
 		}
 
 		return true, nil

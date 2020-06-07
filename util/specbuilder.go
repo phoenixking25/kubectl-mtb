@@ -44,7 +44,8 @@ func MakeSecPod(p PodSpec) *v1.Pod {
 					Args:    []string{"-c", p.Command},
 					Ports:   p.Ports,
 					SecurityContext: &v1.SecurityContext{
-						Privileged: &p.IsPrivileged,
+						RunAsNonRoot: &p.RunAsNonRoot,
+						Privileged:   &p.IsPrivileged,
 						Capabilities: &v1.Capabilities{
 							Add: p.Capability,
 						},
