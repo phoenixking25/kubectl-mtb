@@ -10,10 +10,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-const (
-	expectedVal = "Host IPC is not allowed to be used"
-)
-
 func init() {
 	err := BHIPCbenchmark.ReadConfig("/home/phoenix/GO/src/github.com/phoenixking25/kubectl-mtb/benchmarks/block_host_ipc/config.yaml")
 	if err != nil {

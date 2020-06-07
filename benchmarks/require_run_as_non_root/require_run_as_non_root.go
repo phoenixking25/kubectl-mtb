@@ -10,10 +10,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-const (
-	expectedVal = "spec.containers[0].securityContext.runAsNonRoot: Invalid value: false: must be true"
-)
-
 func init() {
 	err := RRANRbenchmark.ReadConfig("/home/phoenix/GO/src/github.com/phoenixking25/kubectl-mtb/benchmarks/require_run_as_non_root/config.yaml")
 	if err != nil {

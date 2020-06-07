@@ -11,10 +11,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-const (
-	expectedVal = "capability may not be added"
-)
-
 func init() {
 	err := BACbenchmark.ReadConfig("/home/phoenix/GO/src/github.com/phoenixking25/kubectl-mtb/benchmarks/block_add_capabilities/config.yaml")
 	if err != nil {

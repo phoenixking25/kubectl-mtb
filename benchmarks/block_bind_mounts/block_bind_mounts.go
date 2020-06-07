@@ -11,10 +11,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-const (
-	expectedVal = "Host path volumes are not allowed"
-)
-
 func init() {
 	err := BBMbenchmark.ReadConfig("/home/phoenix/GO/src/github.com/phoenixking25/kubectl-mtb/benchmarks/block_bind_mounts/config.yaml")
 	if err != nil {

@@ -10,10 +10,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-const (
-	expectedVal = "Privileged containers are not allowed"
-)
-
 func init() {
 	err := BPCbenchmark.ReadConfig("/home/phoenix/GO/src/github.com/phoenixking25/kubectl-mtb/benchmarks/block_privileged_containers/config.yaml")
 	if err != nil {

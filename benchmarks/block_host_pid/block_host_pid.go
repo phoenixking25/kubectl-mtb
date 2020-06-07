@@ -10,10 +10,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-const (
-	expectedVal = "Host PID is not allowed to be used"
-)
-
 func init() {
 	err := BHPIDbenchmark.ReadConfig("/home/phoenix/GO/src/github.com/phoenixking25/kubectl-mtb/benchmarks/block_host_pid/config.yaml")
 	if err != nil {

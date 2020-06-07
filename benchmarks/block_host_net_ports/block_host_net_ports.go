@@ -3,18 +3,12 @@ package block_host_net_ports
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/phoenixking25/kubectl-mtb/pkg/benchmark"
 	"github.com/phoenixking25/kubectl-mtb/util"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-)
-
-const (
-	expectedHostNetworkVal = "Use of hostNetwork is not allowed"
-	expectedHostPortVal    = "Host port is not allowed to be used"
 )
 
 func init() {
@@ -38,9 +32,6 @@ var BHNPbenchmark = &benchmark.Benchmark{
 		_, err = tclient.CoreV1().Pods(tenantNamespace).Create(context.TODO(), pod, metav1.CreateOptions{DryRun: []string{metav1.DryRunAll}})
 		if err == nil {
 			return false, fmt.Errorf("Tenant must be unable to create pod with host networking set to true")
-		}
-		if !strings.Contains(err.Error(), expectedHostNetworkVal) {
-			return false, err
 		}
 
 		//Tenant should not be allowed to use host ports
