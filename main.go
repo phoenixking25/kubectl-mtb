@@ -15,8 +15,52 @@ limitations under the License.
 */
 package main
 
-import "github.com/phoenixking25/kubectl-mtb/cmd"
+import (
+	"fmt"
+	"io/ioutil"
+	"log"
+	"os"
+
+	"github.com/russross/blackfriday/v2"
+	"gopkg.in/yaml.v2"
+)
+
+type conf struct {
+	Id            string `yaml:"id"`
+	Title         string `yaml:"title"`
+	BenchmarkType string `yaml:"benchmarkType"`
+	Category      string `yaml:"category"`
+	Description   string `yaml:"description"`
+	Remediation   string `yaml:"remediation"`
+	ProfileLevel  int64  `yaml:"profileLevel"`
+}
 
 func main() {
-	cmd.Execute()
+	var t conf
+	data, _ := ioutil.ReadFile("test.yaml")
+	err := yaml.Unmarshal([]byte(data), &t)
+	if err != nil {
+		log.Fatalf("error: %v", err)
+	}
+	output := blackfriday.Run(data)
+	fmt.Println(output)
+	f, err := os.Create("test.md")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	n2, err := f.Write(output)
+	if err != nil {
+		fmt.Println(err)
+		f.Close()
+		return
+	}
+	fmt.Println(n2, "bytes written successfully")
+	err = f.Close()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println("--- t:\n%v\n\n", t)
+	//cmd.Execute()
 }
