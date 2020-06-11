@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/phoenixking25/kubectl-mtb/internal/box"
 	"github.com/phoenixking25/kubectl-mtb/pkg/benchmark"
 	"github.com/phoenixking25/kubectl-mtb/util"
 	v1 "k8s.io/api/core/v1"
@@ -12,7 +13,7 @@ import (
 )
 
 func init() {
-	err := BHNPbenchmark.ReadConfig("/home/phoenix/GO/src/github.com/phoenixking25/kubectl-mtb/benchmarks/block_host_net_ports/config.yaml")
+	err := BHNPbenchmark.ReadConfig(string(box.Get("/block_host_net_ports/config.yaml")))
 	if err != nil {
 		fmt.Println(err.Error())
 	}

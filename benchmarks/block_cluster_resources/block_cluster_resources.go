@@ -3,6 +3,7 @@ package block_cluster_resources
 import (
 	"fmt"
 
+	"github.com/phoenixking25/kubectl-mtb/internal/box"
 	"github.com/phoenixking25/kubectl-mtb/pkg/benchmark"
 	"github.com/phoenixking25/kubectl-mtb/util"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -10,7 +11,7 @@ import (
 )
 
 func init() {
-	err := BCRbenchmark.ReadConfig("/home/phoenix/GO/src/github.com/phoenixking25/kubectl-mtb/benchmarks/block_cluster_resources/config.yaml")
+	err := BCRbenchmark.ReadConfig(string(box.Get("/block_cluster_resources/config.yaml")))
 	if err != nil {
 		fmt.Println(err.Error())
 	}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/phoenixking25/kubectl-mtb/internal/box"
 	"github.com/phoenixking25/kubectl-mtb/pkg/benchmark"
 	"github.com/phoenixking25/kubectl-mtb/util"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -11,7 +12,7 @@ import (
 )
 
 func init() {
-	err := BHIPCbenchmark.ReadConfig("/home/phoenix/GO/src/github.com/phoenixking25/kubectl-mtb/benchmarks/block_host_ipc/config.yaml")
+	err := BHIPCbenchmark.ReadConfig(string(box.Get("/block_host_ipc/config.yaml")))
 	if err != nil {
 		fmt.Println(err.Error())
 	}
