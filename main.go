@@ -15,8 +15,11 @@ limitations under the License.
 */
 package main
 
-import "github.com/phoenixking25/kubectl-mtb/cmd"
+import (
+	"github.com/phoenixking25/kubectl-mtb/cmd"
+)
 
 func main() {
+
 	cmd.Execute()
 }

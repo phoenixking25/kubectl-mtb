@@ -28,5 +28,5 @@ func init() {
 	BenchmarkSuite.AddBenchmark(block_host_net_ports.BHNPbenchmark)
 
 	// Sort according to ID and ProfileLevel
-	BenchmarkSuite.SortBenchmarks()
+	//BenchmarkSuite.SortBenchmarks()
 }
