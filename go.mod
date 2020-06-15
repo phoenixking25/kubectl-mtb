@@ -5,12 +5,15 @@ go 1.13
 require (
 	github.com/creasty/defaults v1.3.0
 	github.com/fatih/color v1.9.0
+	github.com/gobuffalo/packr v1.30.1 // indirect
+	github.com/google/uuid v1.1.1
 	github.com/spf13/cobra v1.0.0
 	gopkg.in/yaml.v2 v2.2.8
 	k8s.io/api v0.18.3
 	k8s.io/apimachinery v0.18.3
 	k8s.io/client-go v0.18.3
 	k8s.io/kubernetes v1.18.3
+	sigs.k8s.io/multi-tenancy/benchmarks v0.0.0-20200615055757-8779b3daa9c3
 )
 
 replace (

@@ -30,3 +30,8 @@ func (p *PodSpec) SetDefaults() error {
 	}
 	return nil
 }
+
+type ServiceConfig struct {
+	Type     v1.ServiceType
+	Selector map[string]string
+}

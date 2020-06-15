@@ -33,7 +33,6 @@ func (b *Benchmark) ReadConfig(path string) error {
 	if err != nil {
 		return err
 	}
-
 	if err := yaml.Unmarshal(file, b); err != nil {
 		return err
 	}
