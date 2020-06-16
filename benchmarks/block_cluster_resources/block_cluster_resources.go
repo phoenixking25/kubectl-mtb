@@ -17,7 +17,7 @@ func init() {
 }
 
 var (
-	verbs = []string{"get", "list", "create", "update", "patch", "watch", "delete", "deletecollection"}
+	verbs = []string{"get", "update"}
 
 	BCRbenchmark = &benchmark.Benchmark{
 		Run: func(tenant, tenantNamespace string, kclient, tclient *kubernetes.Clientset) (bool, error) {
@@ -51,14 +51,18 @@ var (
 				}
 			}
 
-			access, msg, err := util.RunAccessCheck(tclient, tenantNamespace, resources, verbs)
-			if err != nil {
-				return false, err
-			}
-			if access {
-				return false, fmt.Errorf(msg)
-			}
+			for _, resource := range resources {
+				for _, verb := range verbs {
+					access, msg, err := util.RunAccessCheck(tclient, tenantNamespace, resource, verb)
+					if err != nil {
+						return false, err
+					}
+					if access {
+						return false, fmt.Errorf(msg)
+					}
 
+				}
+			}
 			return true, nil
 		},
 	}

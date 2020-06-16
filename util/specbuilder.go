@@ -49,6 +49,7 @@ func MakeSecPod(p PodSpec) *v1.Pod {
 						Capabilities: &v1.Capabilities{
 							Add: p.Capability,
 						},
+						AllowPrivilegeEscalation: &p.AllowPrivilegeEscalation,
 					},
 				},
 			},

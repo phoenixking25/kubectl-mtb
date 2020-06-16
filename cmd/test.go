@@ -100,14 +100,19 @@ func (t *testOptions) validate(cmd *cobra.Command, args []string) {
 		},
 	}
 	verbs := []string{"create"}
-	access, msg, err := util.RunAccessCheck(t.tclient, t.tenantNamespace, resources, verbs)
-	if err != nil {
-		color.Red(t.err.Error())
-		os.Exit(1)
-	}
-	if !access {
-		color.Red(msg)
-		os.Exit(1)
+
+	for _, resource := range resources {
+		for _, verb := range verbs {
+			access, msg, err := util.RunAccessCheck(t.tclient, t.tenantNamespace, resource, verb)
+			if err != nil {
+				color.Red(t.err.Error())
+				os.Exit(1)
+			}
+			if !access {
+				color.Red(msg)
+				os.Exit(1)
+			}
+		}
 	}
 }
 

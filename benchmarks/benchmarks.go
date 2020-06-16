@@ -8,6 +8,8 @@ import (
 	"github.com/phoenixking25/kubectl-mtb/benchmarks/block_host_net_ports"
 	"github.com/phoenixking25/kubectl-mtb/benchmarks/block_host_pid"
 	"github.com/phoenixking25/kubectl-mtb/benchmarks/block_nodeports"
+	"github.com/phoenixking25/kubectl-mtb/benchmarks/block_ns_quota"
+	"github.com/phoenixking25/kubectl-mtb/benchmarks/block_privilege_escalation"
 	"github.com/phoenixking25/kubectl-mtb/benchmarks/block_privileged_containers"
 	"github.com/phoenixking25/kubectl-mtb/benchmarks/require_run_as_non_root"
 	benchmarksuite "github.com/phoenixking25/kubectl-mtb/pkg/benchmarks_suite"
@@ -28,6 +30,8 @@ func init() {
 	BenchmarkSuite.AddBenchmark(block_bind_mounts.BBMbenchmark)
 	BenchmarkSuite.AddBenchmark(block_host_net_ports.BHNPbenchmark)
 	BenchmarkSuite.AddBenchmark(block_nodeports.BNPbenchmark)
+	BenchmarkSuite.AddBenchmark(block_privilege_escalation.BPEbenchmark)
+	BenchmarkSuite.AddBenchmark(block_ns_quota.BNQbenchmark)
 
 	// Sort according to ID and ProfileLevel
 	BenchmarkSuite.SortBenchmarks()

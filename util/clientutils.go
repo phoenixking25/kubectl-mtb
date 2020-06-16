@@ -67,36 +67,31 @@ func ImpersonateWithUserClient(serviceaccountname string, namespace string) (*ku
 	return kclient, nil
 }
 
-func RunAccessCheck(client *kubernetes.Clientset, namespace string, resources []GroupResource, verbs []string) (bool, string, error) {
+func RunAccessCheck(client *kubernetes.Clientset, namespace string, resource GroupResource, verb string) (bool, string, error) {
 	var sar *authorizationv1.SelfSubjectAccessReview
 
 	// Todo for non resource url
-	for _, resource := range resources {
-		for _, verb := range verbs {
-			sar = &authorizationv1.SelfSubjectAccessReview{
-				Spec: authorizationv1.SelfSubjectAccessReviewSpec{
-					ResourceAttributes: &authorizationv1.ResourceAttributes{
-						Namespace:   namespace,
-						Verb:        verb,
-						Group:       resource.APIGroup,
-						Resource:    resource.APIResource.Name,
-						Subresource: "",
-						Name:        "",
-					},
-				},
-			}
-
-			response, err := client.AuthorizationV1().SelfSubjectAccessReviews().Create(context.TODO(), sar, metav1.CreateOptions{DryRun: []string{metav1.DryRunAll}})
-			if err != nil {
-				return false, "", err
-			}
-
-			if response.Status.Allowed {
-				return true, fmt.Sprintf("User can %s %s", verb, resource.APIResource.Name), nil
-			}
-
-			return false, fmt.Sprintf("User cannot %s %s", verb, resource.APIResource.Name), nil
-		}
+	sar = &authorizationv1.SelfSubjectAccessReview{
+		Spec: authorizationv1.SelfSubjectAccessReviewSpec{
+			ResourceAttributes: &authorizationv1.ResourceAttributes{
+				Namespace:   namespace,
+				Verb:        verb,
+				Group:       resource.APIGroup,
+				Resource:    resource.APIResource.Name,
+				Subresource: "",
+				Name:        "",
+			},
+		},
 	}
-	return false, "", fmt.Errorf("Resources or Verbs are empty")
+
+	response, err := client.AuthorizationV1().SelfSubjectAccessReviews().Create(context.TODO(), sar, metav1.CreateOptions{DryRun: []string{metav1.DryRunAll}})
+	if err != nil {
+		return false, "", err
+	}
+
+	if response.Status.Allowed {
+		return true, fmt.Sprintf("User can %s %s", verb, resource.APIResource.Name), nil
+	}
+
+	return false, fmt.Sprintf("User cannot %s %s", verb, resource.APIResource.Name), nil
 }
